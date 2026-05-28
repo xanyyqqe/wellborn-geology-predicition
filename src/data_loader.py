@@ -28,6 +28,7 @@ import pandas as pd
 def prepare_paths(path:str) -> list:
 
     paths = []
+
     for root, _ ,files in os.walk(path):
 
         current_well = []
@@ -44,13 +45,17 @@ def prepare_paths(path:str) -> list:
     return paths
 
 
-def prepare_horizontal(path:str) -> pd.DataFrame:
+def load_horizontal_well(path:str) -> pd.DataFrame:
 
     df = pd.read_csv(path)
     if not(df):
         raise Exception('wrong path for horizontal .csv')
     
     df = df.sort_values(by='MD').reset_index(drop=True)
+
+    formations_to_drop = ['ANCC', 'ASTNU', 'ASTNL', 'EGFDU', 'EGFDL', 'BUDA']
+    df = df.drop(columns=formations_to_drop)
+
     if 'GR' in df.columns:
         df['GR'] = (df['GR'].
                     interpolate(method='linear').
@@ -60,7 +65,7 @@ def prepare_horizontal(path:str) -> pd.DataFrame:
     return df
 
 
-def prepare_typewell(path:str) -> pd.DataFrame:
+def load_typewell(path:str) -> pd.DataFrame:
 
     df = pd.read_csv(path)
     if not(df):
@@ -69,5 +74,3 @@ def prepare_typewell(path:str) -> pd.DataFrame:
     df['GR'] = df['GR'].fillna(df['GR'].median())
 
     return df
-
-
