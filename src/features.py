@@ -39,18 +39,20 @@ def generate_spatial_features(df: pd.DataFrame) -> pd.DataFrame:
 def integrate_with_typewells(hz_df: pd.DataFrame, tw_df: pd.DataFrame) -> pd.DataFrame:
 
     hz_df = hz_df.copy()
-    
-    hz_start = np.array([hz_df['X'].iloc[0], hz_df['Y'].iloc[0]])
-    tw_start = np.array([tw_df['X'].iloc[0], tw_df['Y'].iloc[0]])
-    hz_df['dist_to_closest_typewell'] = np.linalg.norm(hz_start - tw_start)
-    
+
+    if 'GR' not in hz_df.columns or 'GR' not in tw_df.columns:
+        raise KeyError('Both horizontal and typewell data must contain GR values')
+
     tw_tree = cKDTree(tw_df[['GR']].values)
     distances, indices = tw_tree.query(hz_df[['GR']].values, k=1)
-    
-    hz_df['tw_reference_Z'] = tw_df['Z'].iloc[indices].values
-    hz_df['tw_reference_TVT'] = tw_df['TVT'].iloc[indices].values
+
+    hz_df['tw_reference_GR'] = tw_df['GR'].iloc[indices].values
+    hz_df['tw_reference_TVT'] = tw_df['TVT'].iloc[indices].values if 'TVT' in tw_df.columns else np.nan
     hz_df['gr_difference_to_tw'] = distances
-    
+
+    # if 'TVT' in hz_df.columns and 'TVT' in tw_df.columns:
+    #     hz_df['tvtdiff_to_tw'] = np.abs(hz_df['TVT'] - hz_df['tw_reference_TVT'])
+
     return hz_df
 
 
