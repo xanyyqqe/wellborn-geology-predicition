@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from xgboost import XGBRegressor as xgb_model
 from sklearn.metrics import root_mean_squared_error #metric for the competition
-from prepare_data import prepare_target
+from src.prepare_data import prepare_target
 
 
 def validate_model(model, t_X, t_y, v_X, v_y):
@@ -15,8 +15,11 @@ def validate_model(model, t_X, t_y, v_X, v_y):
     print(f'train rmse: {rmse_train}')
     print(f'val rmse: {rmse_val}')
 
+    return rmse_train, rmse_val
+
 
 def prepare_correction_train(df, model):
+
     X, y = prepare_target(df)
 
     fifth = int(len(y)/5)
@@ -24,9 +27,9 @@ def prepare_correction_train(df, model):
     val_X, val_y = X[-fifth:], y[-fifth:]
 
     model.fit(train_X, train_y)
-    predictions = model.predict(val_X)
-    rmse = root_mean_squared_error()
-    
+    rmse_train, rmse_val = validate_model(model, train_X, train_y, val_X, val_y)
+    return model, rmse_train, rmse_val
+
 
 def prepare_correction_test(df, model):
 
@@ -38,5 +41,4 @@ def prepare_correction_test(df, model):
     X = df.drop(columns=['TVT_input'])
 
     model.fit(X, y)
-
     return model
