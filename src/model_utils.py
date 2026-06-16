@@ -18,7 +18,7 @@ def validate_model(model, t_X, t_y, v_X, v_y):
     return rmse_train, rmse_val
 
 
-def prepare_correction_train(df, model):
+def prepare_correction_train_data(df, model):
 
     X, y = prepare_target(df)
 
@@ -31,7 +31,7 @@ def prepare_correction_train(df, model):
     return model, rmse_train, rmse_val
 
 
-def prepare_correction_test(df, model):
+def prepare_correction_test_data(df, model):
 
     df = df.copy()
     df['TVT_prev'] = df['TVT_input'].shift(1)
@@ -40,5 +40,11 @@ def prepare_correction_test(df, model):
     y = df['TVT_input']
     X = df.drop(columns=['TVT_input'])
 
-    model.fit(X, y)
-    return model
+    fifth = int(len(y)/5)
+    train_X, train_y = X[:-fifth], y[:-fifth]
+    val_X, val_y = X[-fifth:], y[-fifth:]
+
+    model.fit(train_X, train_y)
+    rmse_train, rmse_val = validate_model(model, train_X, train_y, val_X, val_y)
+
+    return model, rmse_train, rmse_val

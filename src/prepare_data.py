@@ -1,4 +1,3 @@
-from src.model_utils import prepare_target
 from src.features import full_preprocessing_pipeline
 import pandas as pd
 
